@@ -20,7 +20,7 @@ namespace RetailCorrector
         public string RegId => KVPairs[3].Value;
         public string Token => KVPairs[4].Value;
 
-        private void Search(object sender, System.Windows.RoutedEventArgs e)
+        private void Parse()
         {
             var uri = $"https://ofd.ru/api/integration/v2/inn/{Vatin}/kkt/{RegId}/receipts-info";
             using var http = new HttpClient
@@ -28,8 +28,8 @@ namespace RetailCorrector
                 BaseAddress = new Uri(uri)
             };
             var receipts = new List<Receipt>();
-            MaxProgress = (int)(ToDate - FromDate).TotalDays + 1;
-            for (var date = FromDate; date <= ToDate; date= date.AddDays(1))
+            Dispatcher.Invoke(() => MaxProgress = (int)(ToDate - FromDate).TotalDays + 1);
+            for (var date = FromDate; date <= ToDate; date = date.AddDays(1))
             {
                 var dText = date.ToString(DATE_FORMAT);
                 var @params = $"?dateFrom={dText}T00:00:00&dateTo={dText}T23:59:59&AuthToken={Token}";
@@ -84,9 +84,9 @@ namespace RetailCorrector
                     }
                     receipts.Add(receipt);
                 }
-                CurrentProgress++;
+                Dispatcher.Invoke(() => CurrentProgress++);
             }
-            OnSearched?.Invoke(receipts);
+            Dispatcher.Invoke(() => OnSearched?.Invoke(receipts));
         }
     }    
 }

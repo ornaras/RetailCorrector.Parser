@@ -41,6 +41,9 @@ namespace RetailCorrector
             InitializeComponent();
         }
 
+        private void Search(object sender, System.Windows.RoutedEventArgs e) =>
+            new Thread(Parse) { IsBackground = true }.Start();
+
         private void CellEditEnded(object sender, DataGridCellEditEndingEventArgs e)
         {
             #pragma warning disable S1656
