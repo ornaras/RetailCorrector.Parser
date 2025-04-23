@@ -4,7 +4,7 @@ namespace RetailCorrector
 {
     internal static class ParserConstants
     {
-        public const string DATE_FORMAT = "dd'-'MM'-'yyyy";
+        public const string DATE_FORMAT = "yyyy'-'MM'-'dd";
         public static IFormatProvider FORMAT_PROVIDER = CultureInfo.InvariantCulture;
     }
 }

@@ -22,11 +22,10 @@ namespace RetailCorrector
         public event PropertyChangedEventHandler? PropertyChanged;
     }
 
-    public class DateOption(string key, DateOnly value): 
+    public class DateOption(string key, DateTime value): 
         Option(key, value.ToString(DATE_FORMAT), CheckDate)
     {
-        public DateOption(string key, DateTime value): this(key, DateOnly.FromDateTime(value)) { }
-        public new DateOnly Value => DateOnly.ParseExact(TextValue, DATE_FORMAT, FORMAT_PROVIDER);
+        public new DateTime Value => DateTime.ParseExact(TextValue, DATE_FORMAT, FORMAT_PROVIDER);
 
         private static bool CheckDate(string text) =>
             DateOnly.TryParseExact(text, DATE_FORMAT, FORMAT_PROVIDER, 0, out _);

@@ -1,17 +1,91 @@
 ﻿using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Text.Json.Nodes;
 
 namespace RetailCorrector
 {
     public partial class Parser
     {
         public ObservableCollection<Option> KVPairs { get; } = [
-            // Настройки парсера
-            ];  
+            new DateOption("Начальная дата поиска", DateTime.Today),
+            new DateOption("Конечная дата поиска", DateTime.Today),
+            new VatinOption("ИНН"),
+            new Option("Регистрационный номер", ""),
+            new Option("Токен", ""),
+            ];
+
+        public DateTime FromDate => ((DateOption)KVPairs[0]).Value;
+        public DateTime ToDate => ((DateOption)KVPairs[1]).Value;
+        public string Vatin => KVPairs[2].Value;
+        public string RegId => KVPairs[3].Value;
+        public string Token => KVPairs[4].Value;
 
         private void Search(object sender, System.Windows.RoutedEventArgs e)
         {
+            var uri = $"https://ofd.ru/api/integration/v2/inn/{Vatin}/kkt/{RegId}/receipts-info";
+            using var http = new HttpClient
+            {
+                BaseAddress = new Uri(uri)
+            };
             var receipts = new List<Receipt>();
-            // todo парсинг чеков
+            MaxProgress = (int)(ToDate - FromDate).TotalDays + 1;
+            for (var date = FromDate; date <= ToDate; date= date.AddDays(1))
+            {
+                var dText = date.ToString(DATE_FORMAT);
+                var @params = $"?dateFrom={dText}T00:00:00&dateTo={dText}T23:59:59&AuthToken={Token}";
+                using var req = new HttpRequestMessage(HttpMethod.Get, @params);
+                using var resp = http.Send(req);
+                using var stream = resp.Content.ReadAsStream();
+                var json = JsonNode.Parse(stream)!["Data"]!.AsArray()!;
+                foreach (var item in json)
+                {
+                    var payment = new Payment
+                    {
+                        Cash = item!["CashSumm"]!.GetValue<uint>(),
+                        ECash = item!["ECashSumm"]!.GetValue<uint>(),
+                        Pre = item!["PrepaidSumm"]!.GetValue<uint>(),
+                        Post = item!["CreditSumm"]!.GetValue<uint>(),
+                        Provision = item!["ProvisionSumm"]!.GetValue<uint>(),
+                    };
+                    var receipt = new Receipt
+                    {
+                        ActNumber = null,
+                        Created = DateTime.ParseExact(
+                            item!["DocDateTime"]!.GetValue<string>(),
+                            "yyyy'-'MM'-'dd'T'HH':'mm':'ss", FORMAT_PROVIDER),
+                        FiscalSign = item!["DecimalFiscalNumber"]!.GetValue<string>(),
+                        Items = new Position[item!["Depth"]!.GetValue<int>()],
+                        RoundedSum = item!["TotalSumm"]!.GetValue<uint>(),
+                        Payment = payment,
+                        Operation = item!["OperationType"]!.GetValue<string>().ToLower() switch
+                        {
+                            "income" => Operation.Income,
+                            "expense" => Operation.Outcome,
+                            "refundincome" => Operation.RefundIncome,
+                            "refundexpense" => Operation.RefundOutcome,
+                            _ => throw new ArgumentOutOfRangeException("OperationType")
+                        }
+                    };
+                    var positions = item["Items"]!.AsArray();
+                    for (var i = 0; i < receipt.Items.Length; i++)
+                    {
+                        var pos = positions[i]!;
+                        receipt.Items[i] = new Position
+                        {
+                            Name = pos["Name"]!.GetValue<string>(),
+                            Price = pos["Price"]!.GetValue<uint>(),
+                            Quantity = (uint)(pos["Quantity"]!.GetValue<double>() * 1000),
+                            TotalSum = pos["Total"]!.GetValue<uint>(),
+                            MeasureUnit = (MeasureUnit)(pos["ProductUnitOfMeasure"]?.GetValue<int>() ?? 255),
+                            PayType = (PaymentType)pos["CalculationMethod"]!.GetValue<int>(),
+                            PosType = (PositionType)pos["SubjectType"]!.GetValue<int>(),
+                            TaxRate = (TaxRate)pos["NDS_Rate"]!.GetValue<int>()
+                        };
+                    }
+                    receipts.Add(receipt);
+                }
+                CurrentProgress++;
+            }
             OnSearched?.Invoke(receipts);
         }
     }    
