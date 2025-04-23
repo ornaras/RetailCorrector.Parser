@@ -53,7 +53,7 @@ namespace RetailCorrector
                         Created = DateTime.ParseExact(
                             item!["DocDateTime"]!.GetValue<string>(),
                             "yyyy'-'MM'-'dd'T'HH':'mm':'ss", FORMAT_PROVIDER),
-                        FiscalSign = item!["DecimalFiscalNumber"]!.GetValue<string>(),
+                        FiscalSign = item!["DecimalFiscalSign"]!.GetValue<string>(),
                         Items = new Position[item!["Depth"]!.GetValue<int>()],
                         RoundedSum = item!["TotalSumm"]!.GetValue<uint>(),
                         Payment = payment,
@@ -76,7 +76,7 @@ namespace RetailCorrector
                             Price = pos["Price"]!.GetValue<uint>(),
                             Quantity = (uint)(pos["Quantity"]!.GetValue<double>() * 1000),
                             TotalSum = pos["Total"]!.GetValue<uint>(),
-                            MeasureUnit = (MeasureUnit)(pos["ProductUnitOfMeasure"]?.GetValue<int>() ?? 255),
+                            MeasureUnit = (MeasureUnit)(int.Parse(pos["ProductUnitOfMeasure"]?.GetValue<string>() ?? "255")),
                             PayType = (PaymentType)pos["CalculationMethod"]!.GetValue<int>(),
                             PosType = (PositionType)pos["SubjectType"]!.GetValue<int>(),
                             TaxRate = (TaxRate)pos["NDS_Rate"]!.GetValue<int>()
