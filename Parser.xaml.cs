@@ -1,4 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Net.Http;
+using System.Text.Json.Nodes;
 
 namespace RetailCorrector
 {
@@ -8,11 +11,11 @@ namespace RetailCorrector
             // Настройки парсера
             ];  
 
-        private void Search(object sender, System.Windows.RoutedEventArgs e)
+        private void Parse()
         {
             var receipts = new List<Receipt>();
             // todo парсинг чеков
-            OnSearched?.Invoke(receipts);
+            Dispatcher.Invoke(() => OnSearched?.Invoke(receipts));
         }
     }    
 }
