@@ -22,6 +22,7 @@ namespace RetailCorrector
 
         private void Parse()
         {
+            Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
             var uri = $"https://ofd.ru/api/integration/v2/inn/{Vatin}/kkt/{RegId}/receipts-info";
             using var http = new HttpClient
             {
