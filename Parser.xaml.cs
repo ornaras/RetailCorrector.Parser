@@ -13,6 +13,7 @@ namespace RetailCorrector
 
         private void Parse()
         {
+            Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
             var receipts = new List<Receipt>();
             // todo парсинг чеков
             Dispatcher.Invoke(() => OnSearched?.Invoke(receipts));

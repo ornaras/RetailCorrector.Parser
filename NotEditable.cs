@@ -7,6 +7,7 @@ namespace RetailCorrector
     public partial class Parser : UserControl, INotifyPropertyChanged
     {
         public event Action<List<Receipt>>? OnSearched;
+        public event Action? OnSearchBegin;
 
         public int CurrentProgress
         {
