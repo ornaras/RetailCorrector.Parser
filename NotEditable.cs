@@ -1,13 +1,24 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace RetailCorrector
 {
+    public delegate void ParserLogger(bool error, string text, Exception? exception);
     public partial class Parser : UserControl, INotifyPropertyChanged
     {
-        public event Action? OnSearchBegin;
         public event Action<List<Receipt>>? OnSearched;
+        public event Action? OnSearchBegin;
+        private CancellationTokenSource cancelSource = new();
+        public bool IsEnabledSearch => cancelSource.IsCancellationRequested;
+        public bool IsEnabledCancel => !cancelSource.IsCancellationRequested;
+        public event ParserLogger? Log;
+
+        private void LogError(string text, Exception? exception = null) =>
+            Log?.Invoke(true, text, exception);
+
+        private void LogInfo(string text) => Log?.Invoke(false, text, null);
 
         public int CurrentProgress
         {
@@ -39,19 +50,28 @@ namespace RetailCorrector
 
         public Parser()
         {
+            cancelSource.Cancel();
             InitializeComponent();
         }
 
-        private void Search(object sender, System.Windows.RoutedEventArgs e) =>
-            new Thread(Parse) { IsBackground = true }.Start();
+        private void Cancel(object sender, RoutedEventArgs e) =>
+            cancelSource.Cancel();
+
+        private void Search(object sender, RoutedEventArgs e)
+        {
+            cancelSource = new CancellationTokenSource();
+            Dispatcher.Invoke(() => CurrentProgress = 0);
+            Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
+            Dispatcher.Invoke(() => OnSearched?.Invoke(Parse(cancelSource.Token)));
+        }
 
         private void CellEditEnded(object sender, DataGridCellEditEndingEventArgs e)
         {
-            #pragma warning disable S1656
+#pragma warning disable S1656
             var item = (Option)e.Row.Item;
             if (!item.Check(((TextBox)e.EditingElement).Text))
                 item.TextValue = item.TextValue;
-            #pragma warning restore S1656
+#pragma warning restore S1656
         }
     }
 }
