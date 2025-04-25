@@ -5,6 +5,7 @@ using System.Windows.Controls;
 
 namespace RetailCorrector
 {
+    public delegate void ParserLogger(bool error, string text, Exception? exception);
     public partial class Parser : UserControl, INotifyPropertyChanged
     {
         public event Action<List<Receipt>>? OnSearched;
@@ -12,6 +13,12 @@ namespace RetailCorrector
         private CancellationTokenSource cancelSource = new();
         public bool IsEnabledSearch => cancelSource.IsCancellationRequested;
         public bool IsEnabledCancel => !cancelSource.IsCancellationRequested;
+        public event ParserLogger? Log;
+
+        private void LogError(string text, Exception? exception = null) =>
+            Log?.Invoke(true, text, exception);
+
+        private void LogInfo(string text) => Log?.Invoke(false, text, null);
 
         public int CurrentProgress
         {
