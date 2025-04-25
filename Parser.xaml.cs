@@ -62,8 +62,8 @@ namespace RetailCorrector
                         {
                             "income" => Operation.Income,
                             "expense" => Operation.Outcome,
-                            "refundincome" => Operation.RefundIncome,
-                            "refundexpense" => Operation.RefundOutcome,
+                            "refund income" => Operation.RefundIncome,
+                            "refund expense" => Operation.RefundOutcome,
                             _ => throw new ArgumentOutOfRangeException("OperationType")
                         }
                     };
