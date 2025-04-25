@@ -6,9 +6,10 @@ using System.Windows.Controls;
 namespace RetailCorrector
 {
     public delegate void ParserLogger(bool error, string text, Exception? exception);
+    public delegate void FinishSearch(List<Receipt> receipts, bool cancelled);
     public partial class Parser : UserControl, INotifyPropertyChanged
     {
-        public event Action<List<Receipt>>? OnSearched;
+        public event FinishSearch? OnSearched;
         public event Action? OnSearchBegin;
         private CancellationTokenSource cancelSource = new();
         public bool IsEnabledSearch => cancelSource.IsCancellationRequested;
@@ -69,7 +70,7 @@ namespace RetailCorrector
             Dispatcher.Invoke(() => CurrentProgress = 0);
             Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
             var receipts = await Parse(cancelSource.Token);
-            Dispatcher.Invoke(() => OnSearched?.Invoke(receipts));
+            Dispatcher.Invoke(() => OnSearched?.Invoke(receipts, cancelSource.IsCancellationRequested));
         }
 
         private void CellEditEnded(object sender, DataGridCellEditEndingEventArgs e)
