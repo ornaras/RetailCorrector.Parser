@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Text.Json.Nodes;
+using System.Windows;
 
 namespace RetailCorrector
 {
@@ -33,12 +34,32 @@ namespace RetailCorrector
             Dispatcher.Invoke(() => MaxProgress = (int)(ToDate - FromDate).TotalDays + 1);
             for (var date = FromDate; date <= ToDate; date = date.AddDays(1))
             {
+                JsonNode jsonobj = new JsonObject();
                 var dText = date.ToString(DATE_FORMAT);
                 var @params = $"?dateFrom={dText}T00:00:00&dateTo={dText}T23:59:59&AuthToken={Token}";
-                using var req = new HttpRequestMessage(HttpMethod.Get, @params);
-                using var resp = http.Send(req);
-                using var stream = resp.Content.ReadAsStream();
-                var json = JsonNode.Parse(stream)!["Data"]!.AsArray()!;
+                int countTry = 0;
+                do
+                {
+                    countTry++;
+                    using var req = new HttpRequestMessage(HttpMethod.Get, @params);
+                    using var resp = http.Send(req);
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        Thread.Sleep(countTry * 1000);
+                        continue;
+                    }
+                    using var stream = resp.Content.ReadAsStream();
+                    jsonobj = JsonNode.Parse(stream)!;
+                    if (jsonobj["Status"]!.GetValue<string>() == "Success")
+                        break;
+                } while (countTry < 3);
+
+                if (countTry == 3)
+                {
+                    MessageBox.Show($"Не удалось выгрузить чеки за {dText}!", "Проблема с чеками...");
+                    continue;
+                }
+                var json = jsonobj["Data"]!.AsArray()!;
                 foreach (var item in json)
                 {
                     var payment = new Payment
