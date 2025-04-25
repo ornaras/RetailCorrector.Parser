@@ -54,12 +54,18 @@ namespace RetailCorrector
             InitializeComponent();
         }
 
-        private void Cancel(object sender, RoutedEventArgs e) =>
+        private void Cancel(object sender, RoutedEventArgs e)
+        {
             cancelSource.Cancel();
+            OnPropertyChanged(nameof(IsEnabledSearch));
+            OnPropertyChanged(nameof(IsEnabledCancel));
+        }
 
         private void Search(object sender, RoutedEventArgs e)
         {
             cancelSource = new CancellationTokenSource();
+            OnPropertyChanged(nameof(IsEnabledSearch));
+            OnPropertyChanged(nameof(IsEnabledCancel));
             Dispatcher.Invoke(() => CurrentProgress = 0);
             Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
             Dispatcher.Invoke(() => OnSearched?.Invoke(Parse(cancelSource.Token)));
