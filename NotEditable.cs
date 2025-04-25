@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace RetailCorrector
@@ -8,6 +9,9 @@ namespace RetailCorrector
     {
         public event Action<List<Receipt>>? OnSearched;
         public event Action? OnSearchBegin;
+        private CancellationTokenSource cancelSource = new();
+        public bool IsEnabledSearch => cancelSource.IsCancellationRequested;
+        public bool IsEnabledCancel => !cancelSource.IsCancellationRequested;
 
         public int CurrentProgress
         {
@@ -39,11 +43,21 @@ namespace RetailCorrector
 
         public Parser()
         {
+            cancelSource.Cancel();
             InitializeComponent();
         }
 
-        private void Search(object sender, System.Windows.RoutedEventArgs e) =>
-            new Thread(Parse) { IsBackground = true }.Start();
+        private void Cancel(object sender, RoutedEventArgs e) => 
+            cancelSource.Cancel();
+
+        private void Search(object sender, RoutedEventArgs e)
+        {
+            cancelSource = new CancellationTokenSource();
+            Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
+            new Thread
+                (() => Dispatcher.Invoke(() => OnSearched?.Invoke(Parse(cancelSource.Token)))) 
+            { IsBackground = true }.Start();
+        }
 
         private void CellEditEnded(object sender, DataGridCellEditEndingEventArgs e)
         {

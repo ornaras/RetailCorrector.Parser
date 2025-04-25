@@ -18,6 +18,7 @@
         </DataGrid>
         <ProgressBar Height="8" Width="794" Canvas.Bottom="28" BorderThickness="0" 
                      Maximum="{Binding MaxProgress}" Value="{Binding CurrentProgress}"/>
-        <Button Canvas.Bottom="0" Content="Поиск" Padding="15,5" Canvas.Left="364" Click="Search"/>
+        <Button Canvas.Bottom="0" Content="Поиск" Padding="15,5" Canvas.Left="331" Click="Search" IsEnabled="{Binding IsEnabledSearch}"/>
+        <Button Canvas.Bottom="0" Content="Отмена" Padding="15,5" Canvas.Left="402" Click="Cancel" IsEnabled="{Binding IsEnabledCancel}"/>
     </Canvas>
 </UserControl>

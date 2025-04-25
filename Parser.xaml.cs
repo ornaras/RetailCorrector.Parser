@@ -1,7 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Net.Http;
-using System.Text.Json.Nodes;
 
 namespace RetailCorrector
 {
@@ -11,12 +8,11 @@ namespace RetailCorrector
             // Настройки парсера
             ];  
 
-        private void Parse()
+        private List<Receipt> Parse(CancellationToken cancellationToken)
         {
-            Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
             var receipts = new List<Receipt>();
             // todo парсинг чеков
-            Dispatcher.Invoke(() => OnSearched?.Invoke(receipts));
+            return receipts;
         }
     }    
 }
