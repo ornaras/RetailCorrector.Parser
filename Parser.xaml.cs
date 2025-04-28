@@ -108,7 +108,7 @@ namespace RetailCorrector
                             Price = pos["Price"]!.GetValue<uint>(),
                             Quantity = (uint)(pos["Quantity"]!.GetValue<double>() * 1000),
                             TotalSum = pos["Total"]!.GetValue<uint>(),
-                            MeasureUnit = (MeasureUnit)(int.Parse(pos["ProductUnitOfMeasure"]?.GetValue<string>() ?? "255")),
+                            MeasureUnit = (MeasureUnit)(int.Parse(pos["ProductUnitOfMeasure"]?.GetValue<string>() ?? "-1")),
                             PayType = (PaymentType)pos["CalculationMethod"]!.GetValue<int>(),
                             PosType = (PositionType)pos["SubjectType"]!.GetValue<int>(),
                             TaxRate = (TaxRate)pos["NDS_Rate"]!.GetValue<int>()
