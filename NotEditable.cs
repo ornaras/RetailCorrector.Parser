@@ -71,6 +71,7 @@ namespace RetailCorrector
             Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
             var receipts = await Parse(cancelSource.Token);
             Dispatcher.Invoke(() => OnSearched?.Invoke(receipts, cancelSource.IsCancellationRequested));
+            cancelSource.Cancel();
         }
 
         private void CellEditEnded(object sender, DataGridCellEditEndingEventArgs e)
