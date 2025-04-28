@@ -23,14 +23,11 @@ namespace RetailCorrector
 
         private async Task<List<Receipt>> Parse(CancellationToken cancellationToken)
         {
-            Dispatcher.Invoke(() => CurrentProgress = 0);
+            await Dispatcher.InvokeAsync(() => CurrentProgress = 0);
             var uri = $"https://ofd.ru/api/integration/v2/inn/{Vatin}/kkt/{RegId}/receipts-info";
-            using var http = new HttpClient
-            {
-                BaseAddress = new Uri(uri)
-            };
+            using var http = new HttpClient { BaseAddress = new Uri(uri) };
             var receipts = new List<Receipt>();
-            Dispatcher.Invoke(() => MaxProgress = (int)(ToDate - FromDate).TotalDays + 1);
+            await Dispatcher.InvokeAsync(() => MaxProgress = (int)(ToDate - FromDate).TotalDays + 1);
             
             for (var date = FromDate; date <= ToDate; date = date.AddDays(1))
             {
@@ -116,7 +113,7 @@ namespace RetailCorrector
                     }
                     receipts.Add(receipt);
                 }
-                Dispatcher.Invoke(() => CurrentProgress++);
+                await Dispatcher.InvokeAsync(() => CurrentProgress++);
             }
             return receipts;
         }
