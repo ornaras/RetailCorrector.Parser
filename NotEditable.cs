@@ -64,14 +64,15 @@ namespace RetailCorrector
 
         private async void Search(object sender, RoutedEventArgs e)
         {
+            cancelSource.Dispose();
             cancelSource = new CancellationTokenSource();
             OnPropertyChanged(nameof(IsEnabledSearch));
             OnPropertyChanged(nameof(IsEnabledCancel));
-            Dispatcher.Invoke(() => CurrentProgress = 0);
-            Dispatcher.Invoke(() => OnSearchBegin?.Invoke());
+            await Dispatcher.InvokeAsync(() => CurrentProgress = 0);
+            await Dispatcher.InvokeAsync(() => OnSearchBegin?.Invoke());
             var receipts = await Parse(cancelSource.Token);
-            Dispatcher.Invoke(() => OnSearched?.Invoke(receipts, cancelSource.IsCancellationRequested));
-            cancelSource.Cancel();
+            await Dispatcher.InvokeAsync(() => OnSearched?.Invoke(receipts, cancelSource.IsCancellationRequested));
+            await cancelSource.CancelAsync();
         }
 
         private void CellEditEnded(object sender, DataGridCellEditEndingEventArgs e)
