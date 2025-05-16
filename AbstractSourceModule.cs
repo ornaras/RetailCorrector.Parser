@@ -3,11 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace RetailCorrector
 {
-    public abstract class AbstractSourceModule(CancellationToken token):
+    public abstract class AbstractSourceModule():
         INotifyPropertyChanged
     {
-        protected CancellationToken? _cancelToken = token;
-
         public event Action<bool, string, Exception?>? OnLog;
         public event PropertyChangedEventHandler? PropertyChanged;
         public event Action<string>? OnNotify;
@@ -19,7 +17,7 @@ namespace RetailCorrector
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public abstract Task<bool> OnLoad();
-        public abstract Task<IEnumerable<Receipt>> Parse();
+        public abstract Task<IEnumerable<Receipt>> Parse(CancellationToken token);
         public abstract Task OnUnload();
     }
 }
