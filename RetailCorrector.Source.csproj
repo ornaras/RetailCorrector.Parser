@@ -5,19 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>RetailCorrector</RootNamespace>
-    <Version>0.1</Version>
+    <Version>1.0</Version>
     <Authors>Ornaras</Authors>
     <AssemblyName>RetailCorrector.Source</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RetailCorrector.Data\RetailCorrector.Data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="RetailCorrector.ParserConstants">
-      <Static>True</Static>
-    </Using>
   </ItemGroup>
 
 </Project>
