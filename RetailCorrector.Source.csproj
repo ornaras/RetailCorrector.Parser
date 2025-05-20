@@ -9,10 +9,11 @@
     <Authors>Ornaras</Authors>
     <AssemblyName>RetailCorrector.Source</AssemblyName>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<RepositoryUrl>https://github.com/ornaras/RetailCorrector.Source</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RetailCorrector.Data\RetailCorrector.Data.csproj" />
+    <PackageReference Include="RetailCorrector.Data" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
